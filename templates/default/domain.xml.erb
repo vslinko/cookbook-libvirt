@@ -1,0 +1,42 @@
+<domain type="<%= @new_resource.type %>">
+  <name><%= @new_resource.name %></name>
+  <memory><%= @new_resource.memory %></memory>
+  <os>
+    <type><%= @new_resource.os_type %></type>
+  </os>
+  <features>
+    <acpi/>
+  </features>
+  <devices>
+    <% target = "vda" %>
+    <% @new_resource.disks.each do |disk| %>
+    <disk type="<%= if disk["dev"] then "block" else "file" end %>" device="disk">
+      <% if disk["dev"] %>
+      <source dev="<%= disk["dev"] %>"/>
+      <% else %>
+      <source file="<%= disk["file"] %>"/>
+      <% end %>
+      <target dev="<%= target %>"/>
+      <% if target == "vda" %>
+      <boot order="1"/>
+      <% end %>
+      <% target = target.next %>
+    </disk>
+    <% end %>
+    <% if @new_resource.iso %>
+    <disk type="file" device="cdrom">
+      <source file="<%= @new_resource.iso %>"/>
+      <target dev='hda'/>
+      <boot order="2"/>
+      <readonly/>
+    </disk>
+    <% end %>
+    <interface type="network">
+      <% if @new_resource.mac %>
+      <mac address="<%= @new_resource.mac %>"/>
+      <% end %>
+      <source network="<%= @new_resource.network %>"/>
+    </interface>
+    <graphics type="vnc" port="<%= @new_resource.vnc_port %>" listen="127.0.0.1"/>
+  </devices>
+</domain>

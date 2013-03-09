@@ -1,0 +1,28 @@
+<network>
+  <name><%= @new_resource.name %></name>
+  <% if @uuid %>
+  <uuid><%= @uuid %></uuid>
+  <% end %>
+  <bridge name="<%= @new_resource.bridge %>" />
+  <% if @new_resource.domain %>
+  <domain name="<%= @new_resource.domain %>" />
+  <% end %>
+  <% if @new_resource.dns_hosts %>
+  <dns>
+    <% @new_resource.dns_hosts.each do |dns_host| %>
+    <host ip="<%= dns_host["ip"] %>">
+      <hostname><%= dns_host["hostname"] %></hostname>
+    </host>
+    <% end %>
+  </dns>
+  <% end %>
+  <forward mode="<%= @new_resource.forward %>"/>
+  <ip address="<%= @new_resource.ip_address %>" netmask="<%= @new_resource.netmask %>">
+    <dhcp>
+      <range start="<%= @new_resource.dhcp_range.first %>" end="<%= @new_resource.dhcp_range.last %>" />
+      <% @new_resource.dhcp_hosts.each do |dhcp_host| %>
+      <host mac="<%= dhcp_host["mac"] %>" name="<%= dhcp_host["name"] %>" ip="<%= dhcp_host["ip"] %>" />
+      <% end %>
+    </dhcp>
+  </ip>
+</network>
