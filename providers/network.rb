@@ -41,21 +41,22 @@ action :destroy do
 end
 
 action :redefine do
-  definition_xml = "#{node["libvirt"]["definitions_dir"]}/networks/#{new_resource.name}.xml.tmp"
-  network_xml = "/etc/libvirt/qemu/networks/#{new_resource.name}.xml"
+  definition_xml = "#{node["libvirt"]["definitions_dir"]}/networks/#{new_resource.name}_redefine.xml"
 
-  uuid = uuid = `virsh net-uuid #{new_resource.name}`.strip
+  uuid = `virsh net-uuid #{new_resource.name}`.strip
 
   template definition_xml do
     source "network.xml.erb"
     cookbook "libvirt"
     variables :new_resource => new_resource, :uuid => uuid
+    notifies :run, "execute[redefine_network_#{new_resource.name}]", :immediately
   end
 
-  execute "virsh net-define #{definition_xml}"
-  execute "killall -s SIGHUP dnsmasq"
-
-  file definition_xml do
-    action :delete
+  execute "redefine_network_#{new_resource.name}" do
+    command <<-EOS
+      virsh net-define #{definition_xml}
+      killall -s SIGHUP dnsmasq
+    EOS
+    action :nothing
   end
 end
